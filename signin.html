@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="mainstyles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<style>
+    
+.alert 
+    {
+    display: none;
+}
+</style>
+<body>
+    <header>
+        <nav>
+            <div class="left-item"> 
+                <img src="images/logo3.png" alt="Behind The Counter" width="250" height="150">
+            </div>
+            <div class="center-items">
+                <a href="page.php">Home</a>
+                <a href="about.php">About Us</a>
+                <a href="shopping.php">Shopping</a>
+                <a href="signup.html">Sign Up</a>
+                <a href="signin.html">Sign In</a>
+                <a href="delivery.php">Delivery</a>
+                <a href="cart.php">🛒</a>
+            </div>
+            
+        </nav>
+        <br><br><br><br><h1>Sign In</h1>
+    </header>
+    <div id="successMessage" class="alert alert-success text-center">
+        Sign-up Successful! Please log in.
+    </div>
+
+    <div id="errorMessage" class="alert alert-danger text-center">
+        Invalid email or password. Please try again.
+    </div>
+    <main>
+        <div class="signup-container">
+            <form action="signin.php" method="post">
+                <input type="text" name="email" placeholder="Email" required>
+                <input type="password" name="passcode" placeholder="Password" required>
+                <button type="submit">Sign In</button>
+            </form>
+        </div>
+    </main>
+    <script>
+        function getURLParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Check if 'signup=success' exists and show the success message
+        if (getURLParam('signup') === 'success') {
+            document.getElementById("successMessage").style.display = "block";
+        }
+
+        // Check if 'error=invalid' exists and show the error message
+        if (getURLParam('error') === 'invalid') {
+            document.getElementById("errorMessage").style.display = "block";
+        }
+    </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+</body>
+</html>

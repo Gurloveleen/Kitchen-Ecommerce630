@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="mainstyles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="left-item"> 
+                <img src="images/logo3.png" alt="Behind The Counter" width="250" height="150">
+            </div>
+            <div class="center-items">
+                <a href="page.php">Home</a>
+                <a href="about.php">About Us</a>
+                <a href="shopping.php">Shopping</a>
+                <a href="signup.html">Sign Up</a>
+                <a href="signin.html">Sign In</a>
+                <a href="delivery.php">Delivery</a>
+                <a href="cart.php">🛒</a>
+            </div>
+            
+        </nav>
+        <br><br><br><br><h1>Sign Up</h1>
+    </header>
+    
+    <main>
+        <div class="signup-container">
+            <form action="signup.php" method="post">
+                <input type="text" name="login_id" placeholder="User Name" required>
+                <input type="text" name="name" placeholder="Full Name" required>
+                <input type="text" name="email" placeholder="Email" required>
+                <input type="text" name="tel" placeholder="Phone Number" required>
+                <input type="text" name="address" placeholder="Mailing Address" required>
+                <input type="password" name="passcode" placeholder="Password" required>
+                <input type="text" name="city_code" placeholder="City Code (for example: TO)" required>
+                <button type="submit">Sign Up</button>
+            </form>
+            <p class="abc">Already have an account? <a href="signin.html">Sign in</a></p>
+        </div>
+    </main>
+    
+</body>
+</html>

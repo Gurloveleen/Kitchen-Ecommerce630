@@ -1,0 +1,82 @@
+-- User Table
+CREATE TABLE Users (
+    User_Id INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Tel VARCHAR(15) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Address TEXT NOT NULL,
+    City_Code VARCHAR(10) NOT NULL,
+    Login_Id VARCHAR(50) UNIQUE NOT NULL,
+    Passcode VARCHAR(255) NOT NULL, 
+);
+
+-- Shopping Table (MUST be created before Orders because Orders references it)
+CREATE TABLE Shopping (
+    Receipt_Id INT AUTO_INCREMENT PRIMARY KEY,
+    Store_Code VARCHAR(50) NOT NULL,
+    Total_Price DECIMAL(10,2) NOT NULL
+);
+
+-- Trip Table (MUST be created before Orders)
+CREATE TABLE Trips (
+    Trip_Id INT AUTO_INCREMENT PRIMARY KEY,
+    Source VARCHAR(100) NOT NULL,
+    Destination VARCHAR(100) NOT NULL,
+    Distance_KM DECIMAL(10,2) NOT NULL,
+    Price DECIMAL(10,2) NOT NULL
+);
+
+-- Order Table (Now it correctly references all existing tables)
+CREATE TABLE Orders (
+    Order_Id INT AUTO_INCREMENT PRIMARY KEY,
+    Date_Issued DATETIME DEFAULT CURRENT_TIMESTAMP,
+    Date_Received DATETIME NULL,
+    Total_Price DECIMAL(10,2) NOT NULL,
+    Payment_Code VARCHAR(50) NOT NULL,
+    User_Id INT NOT NULL,
+    Trip_Id INT NOT NULL,
+    Receipt_Id INT NOT NULL,
+    FOREIGN KEY (User_Id) REFERENCES Users(User_Id) ON DELETE CASCADE,
+    FOREIGN KEY (Trip_Id) REFERENCES Trips(Trip_Id) ON DELETE CASCADE,
+);
+
+-- Item Table
+CREATE TABLE Items (
+    Item_Id INT AUTO_INCREMENT PRIMARY KEY,
+    Item_Name VARCHAR(100) NOT NULL,
+    Price DECIMAL(10,2) NOT NULL,
+    Made_In VARCHAR(50),
+    Department_Code VARCHAR(20) NOT NULL,
+    Image_URL VARCHAR(255) NOT NULL
+);
+
+-- Branch Table
+CREATE TABLE branch (
+    Branch_Id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    Branch_Name VARCHAR(255) NOT NULL,
+    Address VARCHAR(500) NOT NULL
+)
+
+INSERT INTO Items (Item_Name, Price, Made_In, Department_Code) VALUES
+('Air Fryer', 89.99, 'China', 'Kitchen'),
+('Blender', 49.99, 'USA', 'Kitchen'),
+('Coffee Maker', 79.99, 'Germany', 'Kitchen'),
+('Kettle', 29.99, 'Canada', 'Kitchen'),
+('Microwave', 129.99, 'Japan', 'Kitchen'),
+('Refrigerator', 699.99, 'South Korea', 'Appliances'),
+('Toaster', 39.99, 'France', 'Kitchen');
+
+UPDATE Items 
+SET Image_URL = CONCAT('images/', 
+                        LOWER(REPLACE(Item_Name, ' ', '_')), 
+                        '.png'); 
+
+INSERT INTO Branch (Branch_Id, Branch_Name, Address) VALUES
+(1, 'Toronto - St.Lawrence Market', '95 Front St. E'),
+(2, 'Toronto - Eaton Centre', '220 Yonge Street'),
+(3, 'Toronto - Yorkdale Mall', '3401 Dufferin Street');
+
+
+
+
+
