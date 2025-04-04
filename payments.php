@@ -11,21 +11,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user_id = $_SESSION['user'];
     $total_price = floatval($_POST['total_price']); 
     $payment_code = uniqid("PAY-");
+    $payment_method = $_POST['payment_method'];  // Get selected payment method
     
     // Fetch trip price from database
-    $trip_id = 1;
-    $trip_price = 0;
-      $trip_query = $conn->prepare("SELECT Price FROM Trips WHERE Trip_Id = ?");    $trip_query->bind_param("i", $trip_id);
-    $trip_query->execute();
-    $trip_query->bind_result($trip_price);
-    $trip_query->fetch();
-    $trip_query->close();
-    
-    
+    $trip_query = $conn->query("SELECT Trip_Id, Price FROM Trips ORDER BY Trip_Id DESC LIMIT 1");
+    $trip = $trip_query->fetch_assoc();
+    $trip_id = $trip['Trip_Id'];
+    $trip_price = $trip['Price'];
+
     $total_price += $trip_price;
 
-    $stmt = $conn->prepare("INSERT INTO Orders (Total_Price, Payment_Code, User_Id, Trip_Id) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("dsii", $total_price, $payment_code, $user_id, $trip_id);
+    // Insert order with payment method
+    $stmt = $conn->prepare("INSERT INTO Orders (Total_Price, Payment_Code, User_Id, Trip_Id, Payment_Method) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("dsiis", $total_price, $payment_code, $user_id, $trip_id, $payment_method);
 
     if ($stmt->execute()) {
         header("Location: confirmation.php?order_id=" . $conn->insert_id);
@@ -37,6 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
     $conn->close();
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -90,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <tbody id="cart-items"><!-- Items loaded from JavaScript --></tbody>
             </table>
 
-            <!-- Delivery fee is dynamically replaced with the actual trip cost from get_trip_price.php -->
+           
             <p><strong>Delivery Fee:</strong> <span id="delivery-fee">$0.00</span></p>
             
             <p><strong>Grand Total:</strong> <span id="grand-total">$0.00</span></p>
@@ -101,6 +100,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <form id="payment-form" method="POST" action="payments.php">
                 <input type="hidden" name="total_price" id="hidden-total-price">
                 
+                <!-- Alternate Payment Methods Dropdown -->
+                <label for="payment-method">Payment Method:</label>
+                <select id="payment-method" name="payment_method" required>
+                    <option value="credit">Credit Card</option>
+                    <option value="debit">Debit Card</option>
+                    <option value="gift">Gift Card</option>
+                </select>
+
                 <label for="card-holder-name">Cardholder Name:</label>
                 <input type="text" id="card-holder-name" name="card_holder_name" required>
 
@@ -149,21 +156,29 @@ function loadCart() {
 
     // Fetch the trip/delivery fee
     fetch("get_trip_price.php")
-        .then(response => response.json())
-        .then(data => {
-            const deliveryFee = parseFloat(data.trip_price) || 0;
-            
-            // Display the fee
-            document.getElementById("delivery-fee").textContent = "$" + deliveryFee.toFixed(2);
+    .then(response => response.json())
+    .then(data => {
+        console.log("Trip Data Fetched:", data);
 
-            // Add it to the total
-            grandTotal += deliveryFee;
+        const deliveryFee = parseFloat(data.trip_price) || 0;
+        document.getElementById("delivery-fee").textContent = "$" + deliveryFee.toFixed(2);
 
-            // Show updated total
-            document.getElementById("grand-total").textContent = "$" + grandTotal.toFixed(2);
-            document.getElementById("hidden-total-price").value = grandTotal.toFixed(2);
-        })
-        .catch(error => console.error("Error fetching trip price:", error));
+        // Fetch the cart total from the previously calculated value
+        let cartTotal = 0;
+        document.querySelectorAll("#cart-table tbody tr").forEach(row => {
+            const priceCell = row.children[3]; // Fourth column (total price per item)
+            if (priceCell) {
+                cartTotal += parseFloat(priceCell.textContent.replace("$", "")) || 0;
+            }
+        });
+
+        // Calculate grand total correctly
+        const grandTotal = cartTotal + deliveryFee;
+        document.getElementById("grand-total").textContent = "$" + grandTotal.toFixed(2);
+        document.getElementById("hidden-total-price").value = grandTotal.toFixed(2);
+    })
+
+
 }
 
 window.onload = loadCart;

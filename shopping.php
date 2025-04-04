@@ -1,5 +1,7 @@
-<?php 
-session_start(); 
+<?php
+session_start();
+
+$admin = isset($_SESSION['admin']) ? $_SESSION['admin'] : false;
 
 $servername = "localhost";
 $username = "root";
@@ -11,11 +13,15 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$admin = false; // Default value
 
-if (isset($_SESSION['user']) && isset($_SESSION['user']['admin'])) {
-    $admin = (int) $_SESSION['user']['admin'] === 1; // Directly use the stored admin flag
-}
+$sql = "SELECT i.*, COALESCE(AVG(r.Rating), 0) AS Avg_Rating, COUNT(r.Review_Id) AS Total_Reviews
+        FROM items i
+        LEFT JOIN reviews r ON i.Item_Id = r.Item_Id
+        WHERE (i.sale_end_time IS NULL OR i.sale_end_time > NOW()) 
+        GROUP BY i.Item_Id";
+$result = $conn->query($sql);
+
+
 
 $conn->close();
 ?>
@@ -64,57 +70,60 @@ $conn->close();
 
     
     <main>
-        <div class="cart" id="cart" ondrop="drop(event)" ondragover="allowDrop(event)">
-            <img src="images/cart.png" alt="Cart Icon" />
-            <ul class="cart-items" id="cart-items">
-            </ul>
-        </div>
+    <h1>Product List</h1>
 
-        <h2>Product List</h2>
-        <div class="listProduct">
-        <?php
-        
-        $servername = "localhost";
-        $username = "root";
-        $password = "";
-        $dbname = "ecommerce_db";
-        
-        $conn = new mysqli($servername, $username, $password, $dbname);
-        
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
+    <div class="cart" id="cart" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <img src="images/cart.png" alt="Cart Icon" />
+        <ul class="cart-items" id="cart-items"></ul>
+    </div>
 
-        $sql = "SELECT * FROM items";
-        $result = $conn->query($sql);
+    <h2>Available Products</h2>
+    <div class="listProduct">
+    <?php                
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $is_on_sale = false; 
+            $discount_price = null;
 
-        if ($result->num_rows > 0) {
-
-            while($row = $result->fetch_assoc()) {
-                echo '<div class="item" draggable="true" data-id="' . $row["Item_Id"] . '" data-name="' . $row["Item_Name"] . '" data-price="' . $row["Price"] . '" data-image="' . $row["Image_URL"] . '">';
-                echo '<img src="' . $row["Image_URL"] . '" alt="' . $row["Item_Name"] . '" width="200" height="200">'; // Display item image
-                echo '<h2>' . $row["Item_Name"] . '</h2>'; // Display item name
-                echo '<div class="price">$' . $row["Price"] . '</div>'; // Display item price
-                echo '<div class="made-in">Made In: ' . $row["Made_In"] . '</div>'; // Display item origin
-                echo '<div class="department">Department: ' . $row["Department_Code"] . '</div>'; // Display department code
-                echo '</div>';
+            
+            if ($row["sale_price"] !== null && !empty($row["sale_end_time"]) && strtotime($row["sale_end_time"]) > time()) {
+                $is_on_sale = true;
+                $discount_price = $row["sale_price"];
             }
-        } else {
-            echo "No items found.";
+
+            echo '<div class="item" draggable="true" data-id="' . $row["Item_Id"] . '" data-name="' . $row["Item_Name"] . '" data-price="' . ($is_on_sale ? $discount_price : $row["Price"]) . '" data-image="' . $row["Image_URL"] . '" data-sale-end-time="' . $row["sale_end_time"] . '">';
+
+            echo '<img src="' . $row["Image_URL"] . '" alt="' . $row["Item_Name"] . '" width="200" height="200">';
+            echo '<h2>' . $row["Item_Name"] . '</h2>';
+
+            if ($is_on_sale) {
+                echo '<div class="price">Was $' . $row["Price"] . ' <strong>Now $' . $discount_price . '</strong></div>';
+                echo '<div class="countdown"></div>';
+            } else {
+                echo '<div class="price">$' . $row["Price"] . '</div>';
+            }
+
+            echo '<div class="made-in">Made In: ' . $row["Made_In"] . '</div>';
+            echo '<div class="department">Department: ' . $row["Department_Code"] . '</div>';
+
+            $average_rating = round($row["Avg_Rating"], 1);
+            echo '<div class="rating">Rating: ' . str_repeat('⭐', round($average_rating)) . ' (' . $row["Total_Reviews"] . ' reviews)</div>';
+            echo '<a href="leave_review.php?item_id=' . $row["Item_Id"] . '"><button>Leave a Review</button></a>';
+            echo '</div>'; 
         }
 
-        $conn->close();
-        ?>
-        </div>
+    } else {
+        echo "No items found.";
+    }
+    ?>
+    </div> 
     </main>
 
     <script>
-        
         function allowDrop(event) {
             event.preventDefault();
         }
 
-        
         function drop(event) {
             event.preventDefault();
 
@@ -125,10 +134,10 @@ $conn->close();
 
             var itemIndex = cartItems.findIndex(i => i.id === item.id);
             if (itemIndex === -1) {
-                item.quantity = 1; // If the item is not in the cart, initialize the quantity
+                item.quantity = 1;
                 cartItems.push(item);
             } else {
-                cartItems[itemIndex].quantity += 1; // If item already exists, increase quantity
+                cartItems[itemIndex].quantity += 1; 
             }
 
             localStorage.setItem("cart", JSON.stringify(cartItems));
@@ -136,10 +145,9 @@ $conn->close();
             updateCartUI();
         }
 
-        // Update the cart count and display items
         function updateCartUI() {
             const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
-            const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0); // Sum of all quantities
+            const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0); 
             document.getElementById("cart-count").textContent = cartCount;
 
             const cartItemsList = document.getElementById("cart-items");
@@ -153,17 +161,50 @@ $conn->close();
         }
 
         // Make items draggable
-        document.querySelectorAll(".item").forEach(item => {
-            item.addEventListener("dragstart", (event) => {
-                const itemData = {
-                    id: event.target.getAttribute("data-id"),
-                    name: event.target.getAttribute("data-name"),
-                    price: event.target.getAttribute("data-price"),
-                    image: event.target.getAttribute("data-image")
-                };
-                event.dataTransfer.setData("text", JSON.stringify(itemData));
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelector(".listProduct").addEventListener("dragstart", function (event) {
+                if (event.target.classList.contains("item")) {
+                    const itemData = {
+                        id: event.target.getAttribute("data-id"),
+                        name: event.target.getAttribute("data-name"),
+                        price: event.target.getAttribute("data-price"),
+                        image: event.target.getAttribute("data-image")
+                    };
+                    event.dataTransfer.setData("text", JSON.stringify(itemData));
+                }
             });
         });
+        
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll('.item').forEach(startCountdown);
+        });
+
+
+        function startCountdown(item) {
+            const saleEndTime = item.getAttribute('data-sale-end-time');
+            if (saleEndTime) {
+                const saleEndDate = new Date(saleEndTime);
+                const countdownElement = item.querySelector('.countdown');
+                if (countdownElement) {
+                    setInterval(() => {
+                        const now = new Date();
+                        const remainingTime = saleEndDate - now;
+
+                        if (remainingTime <= 0) {
+                            countdownElement.textContent = "Sale Ended";
+                            return;
+                        }
+
+                        const hours = Math.floor((remainingTime / (1000 * 60 * 60)) % 24);
+                        const minutes = Math.floor((remainingTime / (1000 * 60)) % 60);
+                        const seconds = Math.floor((remainingTime / 1000) % 60);
+
+                        countdownElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+                    }, 1000);
+                }
+            }
+        }
+
 
         // Load cart count on page load
         updateCartUI();

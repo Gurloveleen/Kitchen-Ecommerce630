@@ -36,6 +36,7 @@ CREATE TABLE Orders (
     User_Id INT NOT NULL,
     Trip_Id INT NOT NULL,
     Receipt_Id INT NOT NULL,
+    Payment_method VARCHAR(20) NOT NULL,
     FOREIGN KEY (User_Id) REFERENCES Users(User_Id) ON DELETE CASCADE,
     FOREIGN KEY (Trip_Id) REFERENCES Trips(Trip_Id) ON DELETE CASCADE,
 );
@@ -47,7 +48,9 @@ CREATE TABLE Items (
     Price DECIMAL(10,2) NOT NULL,
     Made_In VARCHAR(50),
     Department_Code VARCHAR(20) NOT NULL,
-    Image_URL VARCHAR(255) NOT NULL
+    Image_URL VARCHAR(255) NOT NULL,
+    sale_price DECIMAL(10,2) DEFAULT NULL,
+    sale_end_time(DATETIME) DEFAULT NULL
 );
 
 -- Branch Table

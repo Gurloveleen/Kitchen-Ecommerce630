@@ -17,12 +17,10 @@ if (!isset($_SESSION['user'])) {
 }
 
 // Retrieve user session data
-$user = $_SESSION['user'];
-
-// Check if user is an admin
-if (!$user["admin"]) {
+if (!isset($_SESSION['admin']) || $_SESSION['admin'] != 1) {
     die("Unauthorized access.");
 }
+
 
 // Fetch users for editing
 $users_result = $conn->query("SELECT user_id, Name, Email, Admin FROM Users");

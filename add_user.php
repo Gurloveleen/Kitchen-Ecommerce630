@@ -10,8 +10,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Ensure only admins can add users
-if (!isset($_SESSION['user']) || $_SESSION['user']['admin'] != 1) {
+// Retrieve user session data
+if (!isset($_SESSION['admin']) || $_SESSION['admin'] != 1) {
     die("Unauthorized access.");
 }
 

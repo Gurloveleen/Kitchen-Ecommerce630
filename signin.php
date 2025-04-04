@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST["passcode"];
 
     // Fetch user details including hashed password and salt
-    $stmt = $conn->prepare("SELECT name, email, tel, address, city_code, login_id, admin, passcode, salt FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT User_Id, name, email, tel, address, city_code, login_id, admin, passcode, salt FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -31,15 +31,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $hashed_input_password = md5($salt . $password);
 
         if ($hashed_input_password === $stored_hash) {
-            $_SESSION["user"] = [
-                "name" => $user["name"],
-                "email" => $user["email"],
-                "tel" => $user["tel"],
-                "address" => $user["address"],
-                "city_code" => $user["city_code"],
-                "login_id" => $user["login_id"],
-                "admin" => (int) $user["admin"] // Ensure it's stored correctly as an integer
-            ];
+            $_SESSION["user"] = $user["User_Id"];
+            $_SESSION["name"] = $user["name"];
+            $_SESSION["email"] = $user["email"];
+            $_SESSION["tel"] = $user["tel"];
+            $_SESSION["address"] = $user["address"];
+            $_SESSION["city_code"] = $user["city_code"];
+            $_SESSION["login_id"] = $user["login_id"];
+            $_SESSION["admin"] = (int) $user["admin"];  // Ensure it's an integer
 
             header("Location: shopping.php");
             exit();
