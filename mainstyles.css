@@ -120,7 +120,7 @@ img {
 /* Product List Styling */
 .listProduct {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(10px, 1fr)); /* Reduce min size */
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
     gap: 15px; /* Reduce space between items */
     margin-top: 20px;
 }
@@ -143,7 +143,8 @@ img {
 }
 
 .listProduct .item img {
-    width: 30%; /* Reduce image size */
+    width: 100%; 
+    max-height: 150px;
 }
 
 .listProduct .item button {
@@ -155,25 +156,25 @@ img {
 /* Cart Styling (isolated from other elements) */
 .cart {
     position: fixed; /* Ensure cart is fixed at the top-right */
-    right: 20px;
+    right: 250px;
     top: 100px; /* Adjust cart position down slightly to not overlap with the navbar */
     padding: 20px;
     border: 2px dashed #ccc;
-    width: 250px;
-    height: 250px;
+    width: 300px;
+    height: 200px;
     background-color: #f9f9f9;
     text-align: center;
     z-index: 999; /* Ensure it stays above other content */
 }
 
 .cart img {
-    width: 80px;
-    height: 80px;
+    width: 40px;
+    height: 40px;
     margin-bottom: 10px;
 }
 
 .cart p {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: bold;
 }
 
@@ -255,6 +256,19 @@ input[type="password"] {
 input[type="text"]:focus,
 input[type="password"]:focus {
     outline-color: #4B1B07; /* Add a focus outline color */
+}
+
+.team-members {
+    display: flex;
+    justify-content: center; /* centers the team members horizontally */
+    gap: 100px; /* space between each team member */
+    flex-wrap: wrap; /* wraps to next line on smaller screens */
+    padding: 20px;
+}
+
+.team-member {
+    text-align: center;
+    max-width: 200px; /* optional: controls how wide each member card can be */
 }
 
 /* Button Styling */
