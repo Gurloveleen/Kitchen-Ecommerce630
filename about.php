@@ -47,17 +47,17 @@
             
             <div class="team-members">
                 <div class="team-member">
-                    <img src="images/member1.jpg" alt="Sindi Gurakuqi" width="100" height="100">
+                    <img src="images/member1.jpg" alt="Sindi Gurakuqi" width="200" height="200">
                     <h3>Sindi Gurakuqi</h3>
                     <p>sgurakuqi@torontomu.ca</p>
                 </div>
                 <div class="team-member">
-                    <img src="images/member2.jpg" alt="Gurloveleen Dhillon" width="100" height="100">
+                    <img src="images/member2.jpg" alt="Gurloveleen Dhillon" width="200" height="200">
                     <h3>Gurloveleen Dhillon</h3>
                     <p>gurloveleen.dhillon@torontomu.ca</p>
                 </div>
                 <div class="team-member">
-                    <img src="images/member3.jpg" alt="Sayeem Mahfuz" width="100" height="100">
+                    <img src="images/member3.jpg" alt="Sayeem Mahfuz" width="200" height="200">
                     <h3>Sayeem Mahfuz</h3>
                     <p>s1mahfuz@torontomu.ca</p>
                 </div>
